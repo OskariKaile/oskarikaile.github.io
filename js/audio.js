@@ -1,6 +1,7 @@
 const music = document.getElementById('bg-music');
 const wave = document.getElementById('wave-container');
 const statusText = document.getElementById('audio-status');
+const audioControl = document.querySelector('.audio-control');
 let statusTimeout;
 let fadeInterval;
 
@@ -18,6 +19,7 @@ function toggleMusic() {
         music.play();
         wave.classList.add('playing');
         statusText.innerText = 'SOUND: ON';
+        audioControl.setAttribute('aria-pressed', 'true');
 
         fadeInterval = setInterval(() => {
             if (music.volume < targetMaxVolume) {
@@ -31,6 +33,7 @@ function toggleMusic() {
         }, intervalTime);
     } else {
         statusText.innerText = 'SOUND: OFF';
+        audioControl.setAttribute('aria-pressed', 'false');
 
         fadeInterval = setInterval(() => {
             if (music.volume > 0.01) {
@@ -55,6 +58,14 @@ function toggleMusic() {
         }, 3000);
     }
 }
+
+// role="button" needs Enter/Space to actually work like one
+audioControl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleMusic();
+    }
+});
 
 const sfxHover = new Audio('/sounds/255764__andreasmustola__mouse-hover.mp3');
 const sfxClick = new Audio('/sounds/702168__foxfire__click-tick-menu-navigation.wav');

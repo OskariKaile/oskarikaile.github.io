@@ -3038,3 +3038,23 @@ svg {
   right: 0;
   height: 1px;
 }
+
+/* ── Reduced motion ─────────────────────────────────────────────
+   Honour the OS "reduce motion" setting: decorative animations and
+   transitions snap to their end state instead of playing, so nothing
+   that relies on an animation's final frame stays hidden. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,4 +1,7 @@
 window.addEventListener('load', () => {
+    // smooth scroll is the main motion offender — skip it entirely if the OS asks
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const script = document.createElement('script');
     script.src = 'libs/lenis.min.js';
     script.onload = () => {
