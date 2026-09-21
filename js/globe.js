@@ -35,7 +35,7 @@ window.addEventListener('mousemove', (e) => {
         targetLatOffset = 0;
         targetLngOffset = 0;
     }
-});
+}, { passive: true });
 
 function getLatLngAlt(date) {
     const posVel = satellite.propagate(satrec, date);
@@ -149,13 +149,23 @@ async function initGlobe() {
     world.controls().enableZoom = false;
     world.controls().enablePan = false;
 
+    // the globe is only ever seen inside the hero — once .is-fixed kicks in it sits
+    // behind the opaque .Background layer, so watch the hero, not the globe itself.
+    // pausing stops globe.gl's own WebGL render loop, not just our ISS updates
+    const heroEl = globeEl.closest('.hero') || globeEl;
     const observer = new IntersectionObserver(
         ([entry]) => {
             isVisible = entry.isIntersecting;
+            if (isVisible) {
+                lastFrameTime = 0;
+                world.resumeAnimation();
+            } else {
+                world.pauseAnimation();
+            }
         },
-        { threshold: 0.1 }
+        { threshold: 0 }
     );
-    observer.observe(globeEl);
+    observer.observe(heroEl);
 
     const style = document.createElement('style');
     style.innerHTML = `@keyframes pulse { 0% { transform: scale(0.8); opacity: 0.6; } 50% { transform: scale(1.3); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.6; } }`;

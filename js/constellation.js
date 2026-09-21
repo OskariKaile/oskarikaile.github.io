@@ -30,15 +30,6 @@
         svg.setAttribute('height', '100%');
         svg.style.cssText = 'position:absolute;inset:0;pointer-events:none;';
 
-        // soft feather so stars don't look like hard pixels
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        defs.innerHTML = `
-            <filter id="starBlur" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur in="SourceGraphic" stdDeviation="0.4" />
-            </filter>
-        `;
-        svg.appendChild(defs);
-
         const fragment = document.createDocumentFragment();
 
         for (let i = 0; i < STAR_COUNT; i++) {
@@ -51,7 +42,8 @@
             c.setAttribute('r', r);
             c.setAttribute('fill', 'white');
             c.setAttribute('opacity', op);
-            c.setAttribute('filter', 'url(#starBlur)');
+            // no per-star svg filter: 240 filtered circles re-rasterised on every twinkle
+            // frame, and a 0.4px blur is invisible next to normal anti-aliasing
 
             if (!prefersReducedMotion && Math.random() < 0.28) {
                 const delay = (Math.random() * 5).toFixed(1);
@@ -87,15 +79,45 @@
                           : '160,200,255',
                 layer: layerType,
             });
+            dust[dust.length - 1].sprite = getSprite(dust[dust.length - 1].col);
         }
     }
 
+    // pre-render one soft glow per colour instead of building a gradient per particle per frame
+    const SPRITE_SIZE = 32;
+    const sprites = {};
+    function getSprite(col) {
+        if (sprites[col]) return sprites[col];
+        const c = document.createElement('canvas');
+        c.width = c.height = SPRITE_SIZE;
+        const g = c.getContext('2d');
+        const half = SPRITE_SIZE / 2;
+        const gradient = g.createRadialGradient(half, half, 0, half, half, half);
+        gradient.addColorStop(0, `rgba(${col}, 1)`);
+        gradient.addColorStop(1, `rgba(${col}, 0)`);
+        g.fillStyle = gradient;
+        g.fillRect(0, 0, SPRITE_SIZE, SPRITE_SIZE);
+        return (sprites[col] = c);
+    }
+
+    let dustRunning = false;
+
+    function startDust() {
+        if (dustRunning || isPaused || prefersReducedMotion) return;
+        dustRunning = true;
+        requestAnimationFrame(animateDust);
+    }
+
     function animateDust() {
-        if (isPaused || prefersReducedMotion) return;
+        if (isPaused || prefersReducedMotion) {
+            dustRunning = false;
+            return;
+        }
 
         ctx.clearRect(0, 0, W, H);
 
-        dust.forEach((p) => {
+        for (let i = 0; i < dust.length; i++) {
+            const p = dust[i];
             p.x += p.vx;
             p.y += p.vy;
 
@@ -106,15 +128,11 @@
             if (p.x < -10) p.x = W + 10;
             if (p.x > W + 10) p.x = -10;
 
-            const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2);
-            gradient.addColorStop(0, `rgba(${p.col}, ${p.op})`);
-            gradient.addColorStop(1, `rgba(${p.col}, 0)`);
-
-            ctx.beginPath();
-            ctx.fillStyle = gradient;
-            ctx.arc(p.x, p.y, p.r * 2, 0, Math.PI * 2);
-            ctx.fill();
-        });
+            const size = p.r * 4;
+            ctx.globalAlpha = p.op;
+            ctx.drawImage(p.sprite, p.x - size / 2, p.y - size / 2, size, size);
+        }
+        ctx.globalAlpha = 1;
 
         requestAnimationFrame(animateDust);
     }
@@ -161,7 +179,7 @@
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                     isPaused = false;
-                    requestAnimationFrame(animateDust);
+                    startDust();
                 } else {
                     isPaused = true;
                 }

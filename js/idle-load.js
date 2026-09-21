@@ -33,6 +33,7 @@ window.addEventListener('load', () => {
             let animationFrame = 0;
             let isVisible = false;
             let hasTiles = false;
+            let lastDraw = 0;
 
             function startAnimate() {
                 if (!isVisible || !hasTiles || animationFrame) return;
@@ -52,7 +53,8 @@ window.addEventListener('load', () => {
                 const dpr = window.devicePixelRatio || 1;
                 canvas.width = W * dpr;
                 canvas.height = H * dpr;
-                ctx.scale(dpr, dpr);
+                // setTransform, not scale — scale() compounds on every resize
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
                 const cols = Math.ceil(W / TILE_SIZE);
                 const rows = Math.ceil(H / TILE_SIZE);
@@ -77,6 +79,13 @@ window.addEventListener('load', () => {
             function animate(time) {
                 animationFrame = 0;
                 if (!isVisible) return;
+
+                // the pulse is a ~6s sine, 30fps is indistinguishable and halves the work
+                if (time - lastDraw < 33) {
+                    animationFrame = requestAnimationFrame(animate);
+                    return;
+                }
+                lastDraw = time;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = 'rgba(0, 255, 204, 0.1)';

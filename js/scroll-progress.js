@@ -1,10 +1,25 @@
-window.addEventListener('scroll', () => {
+const scrollLine = document.getElementById('scroll-line');
+let progressTicking = false;
+
+function updateScrollProgress() {
+    progressTicking = false;
     const h = document.documentElement;
-    const b = document.body;
-    const st = 'scrollTop';
-    const sh = 'scrollHeight';
+    const max = h.scrollHeight - h.clientHeight;
+    const ratio = max > 0 ? window.scrollY / max : 0;
 
-    const percent = ((h[st] || b[st]) / ((h[sh] || b[sh]) - h.clientHeight)) * 100;
+    // scaleX is compositor-only, width would relayout every scroll
+    scrollLine.style.transform = `scaleX(${ratio})`;
+}
 
-    document.getElementById('scroll-line').style.width = percent + '%';
-});
+window.addEventListener(
+    'scroll',
+    () => {
+        if (!progressTicking) {
+            progressTicking = true;
+            requestAnimationFrame(updateScrollProgress);
+        }
+    },
+    { passive: true }
+);
+
+updateScrollProgress();

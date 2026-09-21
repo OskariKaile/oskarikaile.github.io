@@ -17,6 +17,9 @@ async function initParticles() {
         const particlesContainer = document.getElementById('particles-js');
         let isVisible = false;
         let clickCount = 0;
+        let trampolineRunning = false;
+        let startTrampoline = null;
+        let pjsPaused = false;
 
         const particleCount = isMobile ? (isLowEnd ? 18 : 30) : (isLowEnd ? 45 : 80);
 
@@ -83,7 +86,8 @@ async function initParticles() {
 
             function trampolineLoop() {
                 if (!isVisible) {
-                    requestAnimationFrame(trampolineLoop);
+                    // parked — the visibility observer restarts it
+                    trampolineRunning = false;
                     return;
                 }
 
@@ -134,7 +138,12 @@ async function initParticles() {
                 }
                 requestAnimationFrame(trampolineLoop);
             }
-            requestAnimationFrame(trampolineLoop);
+            startTrampoline = () => {
+                if (trampolineRunning) return;
+                trampolineRunning = true;
+                requestAnimationFrame(trampolineLoop);
+            };
+            startTrampoline();
         }
 
         // easter egg: 10 clicks
@@ -150,6 +159,20 @@ async function initParticles() {
                 isVisible = entry.isIntersecting;
                 const canvas = particlesContainer.querySelector('canvas');
                 if (canvas) canvas.style.visibility = isVisible ? 'visible' : 'hidden';
+
+                // hiding the canvas doesn't stop particles.js — it keeps simulating and
+                // drawing ~3000 link checks a frame. actually stop/restart its loop.
+                const pjs = window.pJSDom?.[0]?.pJS;
+                if (pjs) {
+                    if (!isVisible && !pjsPaused) {
+                        cancelAnimationFrame(pjs.fn.drawAnimFrame);
+                        pjsPaused = true;
+                    } else if (isVisible && pjsPaused) {
+                        pjsPaused = false;
+                        pjs.fn.vendors.draw();
+                    }
+                }
+                if (isVisible && startTrampoline) startTrampoline();
             },
             { threshold: 0.1 }
         );

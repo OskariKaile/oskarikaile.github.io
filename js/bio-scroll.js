@@ -10,8 +10,34 @@ textElement.innerHTML = wordsArray
     .join(' ');
 
 const wordElements = document.querySelectorAll('.scroll-word');
+// last applied state per word — only touch the DOM when it actually changes
+const wordState = new Array(wordElements.length).fill(-1);
+
+let ticking = false;
+let inView = true;
+
+function applyWord(index, state) {
+    if (wordState[index] === state) return;
+    wordState[index] = state;
+
+    const word = wordElements[index];
+    if (state === 0) {
+        word.style.opacity = 1;
+        word.style.filter = 'none';
+    } else if (state === 100) {
+        word.style.opacity = 0;
+        word.style.filter = 'blur(10px)';
+    } else {
+        // blur zone — state is distance * 10, rounded so tiny scroll deltas don't repaint
+        const distance = state / 10;
+        word.style.opacity = 1 - distance * 0.15;
+        word.style.filter = `blur(${distance * 1.5}px)`;
+    }
+}
 
 function handleScrollReveal() {
+    ticking = false;
+
     const rect = container.getBoundingClientRect();
     const windowHeight = window.innerHeight;
 
@@ -19,34 +45,35 @@ function handleScrollReveal() {
     const start = windowHeight * 0.8;
     const end = windowHeight * 0.3;
 
-    const totalDistance = start - end;
-    let progress = (start - rect.top) / totalDistance;
-
+    let progress = (start - rect.top) / (start - end);
     progress = Math.max(0, Math.min(1, progress));
 
     const currentWordIndex = progress * wordsArray.length;
 
-    wordElements.forEach((word, index) => {
-        const distance = index - currentWordIndex;
+    for (let i = 0; i < wordElements.length; i++) {
+        const distance = i - currentWordIndex;
 
-        if (distance < 0) {
-            word.style.opacity = 1;
-            word.style.filter = 'blur(0px)';
-        } else if (distance < 6) {
-            // blur zone — next ~6 words ahead
-            const blurAmount = distance * 1.5;
-            const opacityAmount = 1 - distance * 0.15;
-
-            word.style.opacity = opacityAmount;
-            word.style.filter = `blur(${blurAmount}px)`;
-        } else {
-            word.style.opacity = 0;
-            word.style.filter = 'blur(10px)';
-        }
-    });
+        if (distance < 0) applyWord(i, 0);
+        else if (distance < 6) applyWord(i, Math.max(1, Math.round(distance * 10)));
+        else applyWord(i, 100);
+    }
 }
 
-window.addEventListener('scroll', handleScrollReveal);
+function requestReveal() {
+    if (!ticking && inView) {
+        ticking = true;
+        requestAnimationFrame(handleScrollReveal);
+    }
+}
+
+new IntersectionObserver(([entry]) => {
+    inView = entry.isIntersecting;
+    // one last pass when leaving so words settle in their final state
+    ticking = true;
+    requestAnimationFrame(handleScrollReveal);
+}).observe(container);
+
+window.addEventListener('scroll', requestReveal, { passive: true });
 
 // run once in case page loads scrolled down
 handleScrollReveal();
