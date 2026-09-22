@@ -3134,8 +3134,37 @@ svg {
   box-shadow: 0 0 8px currentColor;
   animation: pulse 2s infinite;
 }
-.pipeline-close {
+.pm-copy {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  gap: 6px;
   margin-left: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #00ffcc;
+  background: rgba(0, 255, 204, 0.06);
+  border: 1px solid rgba(0, 255, 204, 0.3);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease;
+}
+.pm-copy:hover {
+  background: rgba(0, 255, 204, 0.16);
+  border-color: #00ffcc;
+}
+.pm-copy.copied {
+  color: #fd7a33;
+  border-color: #fd7a33;
+  background: rgba(253, 122, 51, 0.1);
+}
+.pipeline-close {
+  margin-left: 10px;
   width: 32px;
   height: 32px;
   display: grid;
@@ -3691,8 +3720,12 @@ svg {
   .pipeline-body {
     padding: 1.5rem 1.1rem;
   }
-  .pm-status {
+  .pm-status,
+  .pm-copy .pm-copy-text {
     display: none;
+  }
+  .pm-copy {
+    padding: 6px 9px;
   }
   .pipeline-close {
     margin-left: auto;
