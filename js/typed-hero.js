@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     new Typed('#typed', {
         strings: [
-            'Coding the Future',
+            'Full-Stack Developer',
             'Entrepreneur',
-            'Problem Solver',
+            'AI and Automation',
             'Science Lover',
-            'Founder',
-            'Lifelong Learner',
+            'Co-founder @ Portawebia',
+            'Building Real Products',
         ],
         typeSpeed: 50,
         backSpeed: 30,
