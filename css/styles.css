@@ -875,6 +875,15 @@ h2 {
     opacity 0.6s ease,
     transform 0.6s ease;
 }
+.skills.no-stagger span.animate {
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.skills.no-stagger span {
+  opacity: 1;
+  transform: none;
+}
 
 .skills span:hover {
   box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
