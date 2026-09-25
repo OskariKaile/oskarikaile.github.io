@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
         strings: [
             'Full-Stack Developer',
             'Entrepreneur',
-            'AI and Automation',
+            'AI Automation Developer',
             'Science Lover',
             'Co-founder @ Portawebia',
             'Building Real Products',

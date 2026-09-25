@@ -2,7 +2,7 @@ const container = document.querySelector('#typed-container');
 const textElement = document.querySelector('#biotyped');
 
 const text =
-    'I am Oskari, a full-stack developer who is really into building things that actually work. I co-founded Portawebia Oy, where I spend my days and most of my nights building websites, software and AI automation for businesses. My life has not been straightforward. I have been all over the place from internships in Germany to starting my own company always trying to solve real problems with code. When I am not staring at the screen I like to look up at the sky. I am really interested in space and how things work. My big goal is to bring these two things using my programming skills to help people get to the stars.';
+    'I am Oskari, a full-stack developer who is really into building things that actually work. I co-founded Portawebia Oy, where I spend my days and most of my nights building websites, software and AI automation for businesses. My life has not been straightforward. I have been all over the place from internships in Germany to starting my own company always trying to solve real problems with code. When I am not staring at the screen I like to look up at the sky. I am really interested in space and how things work. My big goal is to bring these two things together using my programming skills to help people get to the stars.';
 
 const wordsArray = text.split(' ');
 textElement.innerHTML = wordsArray
