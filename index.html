@@ -1080,12 +1080,22 @@
                 <div class="shine"></div>
                 <div class="tiles"></div>
               </div>
-              <img
-                src="/images/Galaxy_Simulation_.webp"
-                srcset="/images/Galaxy_Simulation_.webp 1x, /images/Galaxy_Simulation_.webp 2x"
-                alt="Galaxy Simulation"
-                height="198"
-              />
+              <div class="pp-media">
+                <video
+                  class="pp-video"
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  poster="/images/projects/galaxy.webp"
+                  width="640"
+                  height="400"
+                  aria-label="Galaxy Simulation preview"
+                >
+                  <source src="/images/projects/galaxy.webm" type="video/webm" />
+                  <source src="/images/projects/galaxy.mp4" type="video/mp4" />
+                </video>
+              </div>
               <h3>Galaxy Simulation</h3>
               <p>
                 Interactive 3D Milky Way explorer.<br />fly through 119,614 real stars from the HYG
@@ -1198,12 +1208,22 @@
                 <div class="shine"></div>
                 <div class="tiles"></div>
               </div>
-              <img
-                src="/images/ThreatScope_.webp"
-                srcset="/images/ThreatScope_.webp 1x, /images/ThreatScope_.webp 2x"
-                alt="ThreatScope Cybersecurity Dashboard"
-                height="198"
-              />
+              <div class="pp-media">
+                <video
+                  class="pp-video"
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  poster="/images/projects/threatscope.webp"
+                  width="640"
+                  height="400"
+                  aria-label="ThreatScope preview"
+                >
+                  <source src="/images/projects/threatscope.webm" type="video/webm" />
+                  <source src="/images/projects/threatscope.mp4" type="video/mp4" />
+                </video>
+              </div>
               <h3>ThreatScope</h3>
               <p>
                 Real-time threat intelligence dashboard.<br />Track live CVEs from NVD, query IP
@@ -1301,15 +1321,22 @@
                 <div class="tiles"></div>
               </div>
 
-              <img
-                src="/images/Particle_collision_visualizer_.webp"
-                srcset="
-                  /images/Particle_collision_visualizer_.webp 1x,
-                  /images/Particle_collision_visualizer_.webp 2x
-                "
-                alt="Particle Collision Visualizer"
-                height="198"
-              />
+              <div class="pp-media">
+                <video
+                  class="pp-video"
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  poster="/images/projects/particle.webp"
+                  width="640"
+                  height="400"
+                  aria-label="Particle Collision Visualizer preview"
+                >
+                  <source src="/images/projects/particle.webm" type="video/webm" />
+                  <source src="/images/projects/particle.mp4" type="video/mp4" />
+                </video>
+              </div>
               <h3>Particle Visualizer</h3>
               <p>
                 Interactive 3D LHC event display.<br />explore 8 real particle collision types from
@@ -2217,65 +2244,16 @@
         <!-- Distant planet (top left) -->
         <div class="layer-planet-small-2" id="sdPxs"></div>
 
-        <!-- small cyan planet -->
+        <!-- small planet: frontend -->
         <div class="layer-planet-small-1" id="sdPsm">
           <div class="sm-atmo"></div>
-          <div class="sm-craters">
-            <div class="crater" style="width: 22px; height: 22px; top: 30%; left: 55%"></div>
-            <div class="crater" style="width: 12px; height: 12px; top: 55%; left: 25%"></div>
-            <div class="crater" style="width: 16px; height: 16px; top: 18%; left: 35%"></div>
-          </div>
-          <!-- Orbit tracks -->
-          <div class="orbit-track" style="width: 200px; height: 200px"></div>
-          <div class="orbit-track" style="width: 270px; height: 270px"></div>
-          <!-- Inner ring skills -->
-          <div class="orb-arm" style="--r: 100px; --dur: 8s; --start: 0s">
-            <span class="orb-badge orb-badge-sm">WordPress</span>
-          </div>
-          <div class="orb-arm" style="--r: 100px; --dur: 8s; --start: -4s">
-            <span class="orb-badge orb-badge-sm">SQL</span>
-          </div>
-          <!-- Outer ring skills -->
-          <div class="orb-arm" style="--r: 135px; --dur: 12s; --start: -2s">
-            <span class="orb-badge orb-badge-sm">Shopify</span>
-          </div>
-          <div class="orb-arm" style="--r: 135px; --dur: 12s; --start: -8s">
-            <span class="orb-badge orb-badge-sm">Sass</span>
-          </div>
+          <div class="text-orbit" data-orbit="REACT &bull; TYPESCRIPT &bull; ANGULAR &bull; TAILWIND &bull;" aria-hidden="true"></div>
         </div>
 
-        <!-- main teal planet -->
+        <!-- main planet: ai & automation -->
         <div class="layer-planet" id="sdPmain">
           <div class="planet-atmo"></div>
-          <div class="planet-craters">
-            <div class="crater" style="width: 40px; height: 40px; top: 55%; left: 60%"></div>
-            <div class="crater" style="width: 22px; height: 22px; top: 20%; left: 70%"></div>
-            <div class="crater" style="width: 16px; height: 16px; top: 72%; left: 30%"></div>
-            <div class="crater" style="width: 28px; height: 28px; top: 40%; left: 12%"></div>
-          </div>
-          <!-- Orbit tracks -->
-          <div class="orbit-track" style="width: 340px; height: 340px"></div>
-          <div class="orbit-track" style="width: 440px; height: 440px"></div>
-          <!-- inner ring -->
-          <div class="orb-arm" style="--r: 170px; --dur: 10s; --start: 0s">
-            <span class="orb-badge">React</span>
-          </div>
-          <div class="orb-arm" style="--r: 170px; --dur: 10s; --start: -3.33s">
-            <span class="orb-badge">Python</span>
-          </div>
-          <div class="orb-arm" style="--r: 170px; --dur: 10s; --start: -6.66s">
-            <span class="orb-badge">C#</span>
-          </div>
-          <!-- outer ring -->
-          <div class="orb-arm" style="--r: 220px; --dur: 16s; --start: 0s">
-            <span class="orb-badge">Unity</span>
-          </div>
-          <div class="orb-arm" style="--r: 220px; --dur: 16s; --start: -5.33s">
-            <span class="orb-badge">AWS</span>
-          </div>
-          <div class="orb-arm" style="--r: 220px; --dur: 16s; --start: -10.66s">
-            <span class="orb-badge">Docker</span>
-          </div>
+          <div class="text-orbit" data-orbit="LLM APIS &bull; TOOL CALLING &bull; WORKFLOW AUTOMATION &bull; PLAYWRIGHT &bull;" aria-hidden="true"></div>
         </div>
       </div>
     </section>
@@ -2801,6 +2779,8 @@
 
     <script src="js/magnetic.js" defer></script>
     <script src="js/constellation.js" defer></script>
+    <script src="js/text-orbits.js" defer></script>
+    <script src="js/project-previews.js" defer></script>
     <script src="js/tilt.js" defer></script>
     <script src="js/scroll-progress.js" defer></script>
     <script src="js/btn-text.js" defer></script>
