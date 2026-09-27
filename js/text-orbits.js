@@ -7,6 +7,13 @@
     const wrap = document.getElementById('spaceDivider');
     if (!wrap) return;
 
+    const CHUNK = 3;
+
+    // nothing spins or breathes while the scene is off screen
+    new IntersectionObserver((entries) => {
+        entries.forEach((entry) => wrap.classList.toggle('is-offscreen', !entry.isIntersecting));
+    }).observe(wrap);
+
     // font size is solved so the text wraps the full circumference evenly
     function buildOrbit(host) {
         const orbit = host.querySelector('.text-orbit');
@@ -25,14 +32,23 @@
 
         const spin = document.createElement('div');
         spin.className = 'text-orbit-spin';
+        spin.style.fontSize = `${font}px`;
         const frag = document.createDocumentFragment();
-        for (let i = 0; i < chars.length; i++) {
-            const span = document.createElement('span');
-            span.textContent = chars[i] === ' ' ? String.fromCharCode(160) : chars[i]; // nbsp keeps the slot
-            span.style.cssText =
-                `width:${pitch}px;height:${font}px;left:${-pitch / 2}px;top:${-font / 2}px;` +
-                `font-size:${font}px;transform:rotateY(${i * step}deg) translateZ(${R}px)`;
-            frag.appendChild(span);
+        // every 3d-transformed element is its own gpu layer, so letters go on
+        // in flat chunks of 3; the facets sit ~1% off the true curve, unseen
+        for (let i = 0; i < chars.length; i += CHUNK) {
+            const n = Math.min(CHUNK, chars.length - i);
+            const chunk = document.createElement('span');
+            chunk.style.cssText =
+                `width:${pitch * n}px;height:${font}px;left:${(-pitch * n) / 2}px;top:${-font / 2}px;` +
+                `transform:rotateY(${(i + (n - 1) / 2) * step}deg) translateZ(${R}px)`;
+            for (let k = 0; k < n; k++) {
+                const letter = document.createElement('i');
+                letter.style.width = `${pitch}px`;
+                letter.textContent = chars[i + k] === ' ' ? String.fromCharCode(160) : chars[i + k]; // nbsp keeps the slot
+                chunk.appendChild(letter);
+            }
+            frag.appendChild(chunk);
         }
         spin.appendChild(frag);
         orbit.appendChild(spin);

@@ -2949,20 +2949,33 @@ svg {
 .layer-planet-small-1 .text-orbit-spin {
   --orbit-speed: 22s;
 }
-.text-orbit-spin span {
-  position: absolute;
-  display: block;
-  text-align: center;
+.space-divider.is-offscreen .text-orbit-spin,
+.space-divider.is-offscreen .planet-atmo,
+.space-divider.is-offscreen .sm-atmo {
+  animation-play-state: paused;
+}
+.text-orbit-spin {
   font-family: 'Orbitron', sans-serif;
   font-weight: 900;
   line-height: 1;
   color: #d9fff6;
-  /* chromatic split, like a glitchy hologram */
+  /* chromatic split, like a glitchy hologram. no blur: blurred shadows on
+     ~40 moving 3d layers were the scene's biggest gpu cost */
   text-shadow:
     -2px 0 rgba(255, 70, 130, 0.75),
-    2px 0 rgba(0, 235, 255, 0.75),
-    0 0 14px rgba(0, 255, 204, 0.45);
+    2px 0 rgba(0, 235, 255, 0.75);
+}
+/* one flat 3d panel per 3-letter chunk */
+.text-orbit-spin > span {
+  position: absolute;
+  display: flex;
   backface-visibility: visible;
+}
+.text-orbit-spin i {
+  display: block;
+  flex: none;
+  font-style: normal;
+  text-align: center;
 }
 /* thin guide rails above and below the letters */
 .text-orbit-rail {
