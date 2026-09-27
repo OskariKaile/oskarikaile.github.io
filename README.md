@@ -10,7 +10,7 @@ Personal portfolio of **Oskari Kaile**, full-stack developer and co-founder of [
 
 - **Projects:** Galaxy Simulation, ThreatScope and Particle Visualizer, each with a live demo and source link.
 - **Featured work:** Orion (local AI voice assistant, in progress) and the **AI Outbound Pipeline**, with a full case study: architecture, before/after demo, production numbers and what broke. Direct link: [`/#ai-outbound-pipeline`](https://oskarikaile.github.io/#ai-outbound-pipeline)
-- **Companies:** Portawebia Oy (co-founder) and ScanSal Oy (co-owner, head of IT).
+- **Companies:** Portawebia Oy (co-founder) and ScanSal Oy (co-founder, head of IT).
 - **Client sites:** a selection of websites shipped for Portawebia clients.
 - **Experience & skills:** work history, tech stack, and AI & automation skills.
 

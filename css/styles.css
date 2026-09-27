@@ -2857,6 +2857,51 @@ svg {
   clip-path: inset(50% 0 0 0);
 }
 
+/* surface emblem: printed flat on the planet face (z=0), so the orbit's
+   front half passes over it and the back half behind it */
+.planet-emblem {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--size) * 0.02);
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+}
+.planet-emblem span {
+  font-size: calc(var(--size) * 0.055);
+  letter-spacing: 0.22em;
+  margin-right: -0.22em; /* balance the trailing letter-spacing */
+  opacity: 0.8;
+}
+.planet-emblem-ai {
+  color: rgba(225, 220, 255, 0.9);
+  text-shadow:
+    0 0 12px rgba(150, 140, 255, 0.85),
+    0 0 34px rgba(110, 100, 255, 0.5);
+}
+.planet-emblem-ai strong {
+  font-size: calc(var(--size) * 0.3);
+  letter-spacing: 0.04em;
+}
+.planet-emblem-dev {
+  color: rgba(255, 238, 218, 0.92);
+  text-shadow: 0 0 10px rgba(255, 150, 70, 0.9);
+}
+.planet-emblem-dev svg {
+  width: calc(var(--size) * 0.36);
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(255, 150, 70, 0.9));
+}
+.planet-emblem-dev span {
+  font-size: calc(var(--size) * 0.07);
+}
+
 @keyframes atmoBreathe {
   0%,
   100% {
