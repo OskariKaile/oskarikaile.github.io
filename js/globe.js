@@ -62,6 +62,125 @@ function generateOrbitTrail(centerDate) {
 }
 
 let isTrackingISS = false;
+let isWarm = false;
+
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
+// globe.gl applies data changes on a short debounce, not synchronously
+const afterDigest = () => new Promise((resolve) => setTimeout(resolve, 30));
+
+// meshing cost grows with a country's area (its fill is a grid of points), so
+// batches are sized by rough area: big countries get a frame to themselves,
+// dozens of small ones share one
+const BATCH_AREA = 1500; // square degrees of bounding box
+const BATCH_MAX = 12;
+
+function ringsOf(geometry) {
+    const polys = geometry.type === 'MultiPolygon' ? geometry.coordinates : [geometry.coordinates];
+    return polys.flat();
+}
+
+function bboxArea(geometry) {
+    let minX = 180, maxX = -180, minY = 90, maxY = -90;
+    for (const ring of ringsOf(geometry)) {
+        for (const [x, y] of ring) {
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+    }
+    return (maxX - minX) * (maxY - minY);
+}
+
+// antarctica's outline wraps right round the south pole, which forces globe.gl
+// onto a far slower spherical triangulation (~150ms for that one shape). its
+// fill is built from a west and an east half that stop just short of the pole
+// instead, and its coast is drawn as a line so the cut between them never shows
+const POLE_LAT = -88.9;
+let coastPaths = [];
+
+function polarEdge(fromLng, toLng) {
+    const pts = [];
+    const dir = Math.sign(toLng - fromLng);
+    for (let lng = fromLng; dir * (toLng - lng) > 0; lng += dir * 10) pts.push([lng, POLE_LAT]);
+    pts.push([toLng, POLE_LAT]);
+    return pts;
+}
+
+function splitAntarctica(features) {
+    const ant = features.find((f) => f.properties.NAME === 'Antarctica');
+    const polys = ant ? ant.geometry.coordinates : [];
+    const mainIdx = polys.findIndex((poly) => poly[0].some(([, y]) => y <= -89.9));
+    if (mainIdx === -1) return features;
+
+    // the ring runs the coast from -180 to 180 and closes back along the pole;
+    // rotate it to start at -180 and keep just the coast
+    const ring = polys[mainIdx][0].slice(0, -1);
+    const start = ring.findIndex(([x, y], i) => x === -180 && y > -89.9 && ring[(i || ring.length) - 1][1] <= -89.9);
+    const coast = ring.slice(start).concat(ring.slice(0, start)).filter(([, y]) => y > -89.9);
+    const cut = coast.findIndex(([x], i) => i > 0 && coast[i - 1][0] < 0 && x >= 0);
+    if (start === -1 || cut === -1) return features;
+
+    const [x0, y0] = coast[cut - 1];
+    const [x1, y1] = coast[cut];
+    const mid = [0, y0 + ((y1 - y0) * -x0) / (x1 - x0)];
+    const west = [...coast.slice(0, cut), mid, ...polarEdge(0, -180), coast[0]];
+    const east = [mid, ...coast.slice(cut), ...polarEdge(180, 0), mid];
+
+    coastPaths = [{ coast: true, coords: coast.map(([lng, lat]) => ({ lat, lng, alt: 0.01 })) }];
+    const fill = (outline) => ({ type: 'Feature', properties: ant.properties, fillOnly: true, geometry: { type: 'Polygon', coordinates: [outline] } });
+    const islands = { ...ant, geometry: { type: 'MultiPolygon', coordinates: polys.filter((_, i) => i !== mainIdx) } };
+    return features.flatMap((f) => (f === ant ? [islands, fill(west), fill(east)] : [f]));
+}
+
+function batchByArea(features) {
+    const batches = [];
+    let batch = [];
+    let area = 0;
+    for (const f of features) {
+        const a = bboxArea(f.geometry);
+        if (batch.length && (area + a > BATCH_AREA || batch.length >= BATCH_MAX)) {
+            batches.push(batch);
+            batch = [];
+            area = 0;
+        }
+        batch.push(f);
+        area += a;
+    }
+    if (batch.length) batches.push(batch);
+    return batches;
+}
+
+async function warmUp(features) {
+    // one batch of countries plus the orbit trail puts every material type in
+    // the scene, so compileAsync can build all the shaders without blocking
+    const batches = batchByArea(splitAntarctica(features));
+    const shown = [...batches[0]];
+    world.polygonsData(shown);
+    const now = new Date();
+    world.pathsData([{ coords: generateOrbitTrail(now) }, ...coastPaths]);
+    lastTrailUpdate = now.getTime();
+    await afterDigest();
+
+    const renderer = world.renderer();
+    if (renderer.compileAsync) {
+        try {
+            await renderer.compileAsync(world.scene(), world.camera());
+        } catch (e) {
+            // fall back to compiling on first render
+        }
+    }
+
+    isWarm = true;
+    if (isVisible) world.resumeAnimation();
+
+    for (let i = 1; i < batches.length; i++) {
+        await nextFrame();
+        shown.push(...batches[i]);
+        world.polygonsData(shown.slice());
+    }
+    await afterDigest();
+}
 
 async function initGlobe() {
     const landData = await fetch('data/ne_110m_admin_0_countries.geojson.json').then((res) =>
@@ -90,16 +209,20 @@ async function initGlobe() {
         .atmosphereColor('#00ffcc')
         .atmosphereAltitude(0.2)
         .showGraticules(true)
-        .polygonsData(landData.features)
+        .polygonsData([])
+        // countries are streamed in by warmUp(), and the rise-in tween would
+        // rebuild every country mesh each frame for a second
+        .polygonsTransitionDuration(0)
         .polygonCapColor(() => 'rgba(0, 255, 204, 0.1)')
-        .polygonStrokeColor(() => '#00ffcc')
+        .polygonSideColor((d) => (d.fillOnly ? null : '#ffffaa'))
+        .polygonStrokeColor((d) => (d.fillOnly ? null : '#00ffcc'))
         .polygonAltitude(0.01)
         .pathPoints('coords')
         .pathPointLat((p) => p.lat)
         .pathPointLng((p) => p.lng)
         .pathPointAlt((p) => p.alt)
-        .pathColor(() => 'rgba(253, 122, 51, 0.5)')
-        .pathStroke(1.5)
+        .pathColor((d) => (d.coast ? '#00ffcc' : 'rgba(253, 122, 51, 0.5)'))
+        .pathStroke((d) => (d.coast ? null : 1.5))
         .htmlElementsData([issMarker])
         .htmlAltitude((p) => p.alt)
 
@@ -118,7 +241,14 @@ async function initGlobe() {
             return el;
         });
 
-    world.onGlobeReady(() => {
+    // building all 177 country meshes, compiling their shaders and uploading
+    // them in one go froze the page for ~0.5s a few seconds after load. so:
+    // hold rendering, compile shaders off the main thread, then add the
+    // countries a few per frame, and only reveal the globe once it's all in
+    world.pauseAnimation();
+    const globeReady = new Promise((resolve) => world.onGlobeReady(resolve));
+
+    Promise.all([globeReady, warmUp(landData.features)]).then(() => {
         // small pause before the entrance so the page settles first
         setTimeout(() => {
             globeEl.classList.add('globe-ready');
@@ -158,7 +288,7 @@ async function initGlobe() {
             isVisible = entry.isIntersecting;
             if (isVisible) {
                 lastFrameTime = 0;
-                world.resumeAnimation();
+                if (isWarm) world.resumeAnimation();
             } else {
                 world.pauseAnimation();
             }
@@ -234,7 +364,7 @@ function updateFrame(timestamp) {
 
     if (now.getTime() - lastTrailUpdate > 60000) {
         const trailCoords = generateOrbitTrail(now);
-        world.pathsData([{ coords: trailCoords }]);
+        world.pathsData([{ coords: trailCoords }, ...coastPaths]);
         lastTrailUpdate = now.getTime();
     }
 
