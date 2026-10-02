@@ -18,4 +18,6 @@
     }
 
     requestAnimationFrame(raf);
+    // the history timeline uses it to jump to a card
+    window.lenis = lenis;
 })();

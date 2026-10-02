@@ -78,7 +78,7 @@
     <script src="libs/satellite.min.js" defer></script>
     <script src="libs/typed.umd.js" defer></script>
     <script src="libs/lenis.min.js" defer></script>
-    <script src="js/lenis-loader.js?v=2" defer></script>
+    <script src="js/lenis-loader.js?v=3" defer></script>
 
     <link rel="stylesheet" href="css/styles.css?v=5" />
   </head>
@@ -1594,8 +1594,39 @@
             <div class="sh-seg sh-seg-r"></div>
           </div>
         </div>
+        <!-- overview chart: filled in by js/xp-timeline.js from the data-* on each item below -->
+        <div class="xp-overview" hidden>
+          <div class="xp-ov-head">
+            <span class="xp-ov-title">// timeline.overview</span>
+            <ul class="xp-legend">
+              <li style="--c: var(--c-studies)">Studies</li>
+              <li style="--c: var(--c-work)">Work</li>
+              <li style="--c: var(--c-abroad)">Abroad</li>
+              <li style="--c: var(--c-company)">Own company</li>
+            </ul>
+          </div>
+          <div class="xp-ov-scroll">
+            <div class="xp-chart"></div>
+          </div>
+          <p class="xp-ov-hint">Swipe the chart &middot; tap a bar to jump to it</p>
+        </div>
+
+        <!--
+          each item: data-lane = studies | work | company, data-start / data-end = YYYY-MM-DD
+          (data-end="now" = still going). Studies and company items get a side line that runs
+          past every item that happened at the same time.
+        -->
         <div class="experience-list">
-          <div class="experience-item">
+          <div
+            class="experience-item"
+            id="xp-tredu"
+            data-lane="studies"
+            data-start="2021-08-01"
+            data-end="2024-06-01"
+            data-label="Tredu · Software Developer"
+            data-duration="3 years"
+            data-type="Education"
+          >
             <span class="experience-year">2021</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1627,7 +1658,15 @@
             </div>
           </div>
 
-          <div class="experience-item">
+          <div
+            class="experience-item"
+            id="xp-lemonsoft-2022"
+            data-lane="work"
+            data-start="2022-06-01"
+            data-end="2022-06-30"
+            data-label="Lemonsoft"
+            data-type="Summer job"
+          >
             <span class="experience-year">2022</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1658,7 +1697,15 @@
               </p>
             </div>
           </div>
-          <div class="experience-item">
+          <div
+            class="experience-item"
+            id="xp-lemonsoft-intern"
+            data-lane="work"
+            data-start="2022-10-24"
+            data-end="2022-12-15"
+            data-label="Lemonsoft"
+            data-type="Internship"
+          >
             <span class="experience-year">2022</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1689,7 +1736,15 @@
               </p>
             </div>
           </div>
-          <div class="experience-item">
+          <div
+            class="experience-item"
+            id="xp-lemonsoft-2023"
+            data-lane="work"
+            data-start="2023-05-29"
+            data-end="2023-07-21"
+            data-label="Lemonsoft"
+            data-type="Summer job"
+          >
             <span class="experience-year">2023</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1720,7 +1775,55 @@
               </p>
             </div>
           </div>
-          <div class="experience-item">
+          <div
+            class="experience-item current"
+            id="xp-portawebia"
+            data-lane="company"
+            data-start="2023-08-26"
+            data-end="now"
+            data-label="Portawebia Oy · Co-founder"
+            data-type="Own company"
+          >
+            <span class="experience-year">2023</span>
+            <div class="experience-card">
+              <div class="card-grid-bg" aria-hidden="true">
+                <div class="shine"></div>
+                <div class="tiles"></div>
+              </div>
+              <div class="experience-company-logo_container">
+                <!-- Portawebia Oy -->
+                <a
+                  href="https://www.portawebia.com"
+                  target="_blank"
+                  class="social-icon magnetic sfx-click sfx-hover"
+                  aria-label="Portawebia Oy"
+                >
+                  <img
+                    src="/images/Portawebia.png"
+                    width="50px"
+                    height="43.83px"
+                    alt="Portawebia Oy"
+                    class="experience-company-logo own-company-logo"
+                  />
+                </a>
+              </div>
+              <h3>Co-founder &amp; Lead Developer @ Portawebia Oy</h3>
+              <p class="colored-date">August 26, 2023 - Present Day</p>
+              <p>
+                Co-founded and run a web and software agency. Shipped 10+ client websites, built the company's AI outbound pipeline (in production), and own all technical decisions from architecture to deployment.
+              </p>
+            </div>
+          </div>
+          <div
+            class="experience-item"
+            id="xp-pco"
+            data-lane="work"
+            data-abroad="Germany"
+            data-start="2024-01-14"
+            data-end="2024-02-25"
+            data-label="Pco · Germany"
+            data-type="International internship"
+          >
             <span class="experience-year">2024</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1751,7 +1854,15 @@
               </p>
             </div>
           </div>
-          <div class="experience-item">
+          <div
+            class="experience-item"
+            id="xp-artx"
+            data-lane="work"
+            data-start="2024-03-15"
+            data-end="2024-05-15"
+            data-label="ArtX"
+            data-type="Internship"
+          >
             <span class="experience-year">2024</span>
             <div class="experience-card">
               <div class="card-grid-bg" aria-hidden="true">
@@ -1782,36 +1893,14 @@
               </p>
             </div>
           </div>
-          <div class="experience-item current">
+
+          <!-- end of the timeline: only what is still running reaches this point -->
+          <div class="experience-item xp-now-item" data-lane="now" data-start="now">
             <span class="experience-year current">Now</span>
-            <div class="experience-card">
-              <div class="card-grid-bg" aria-hidden="true">
-                <div class="shine"></div>
-                <div class="tiles"></div>
-              </div>
-              <div class="experience-company-logo_container">
-                <!-- Portawebia Oy -->
-                <a
-                  href="https://www.portawebia.com"
-                  target="_blank"
-                  class="social-icon magnetic sfx-click sfx-hover"
-                  aria-label="Portawebia Oy"
-                >
-                  <img
-                    src="/images/Portawebia.png"
-                    width="50px"
-                    height="43.83px"
-                    alt="Portawebia Oy"
-                    class="experience-company-logo own-company-logo"
-                  />
-                </a>
-              </div>
-              <h3>Co-founder &amp; Lead Developer @ Portawebia Oy</h3>
-              <p class="colored-date">August 26, 2023 - Present Day</p>
-              <p>
-                Co-founded and run a web and software agency. Shipped 10+ client websites, built the company's AI outbound pipeline (in production), and own all technical decisions from architecture to deployment.
-              </p>
-            </div>
+            <p class="xp-now-card">
+              <span class="xp-now-pulse" aria-hidden="true"></span>
+              <strong>Present</strong> &mdash; running Portawebia Oy and building Orion.
+            </p>
           </div>
         </div>
       </div>
@@ -2828,6 +2917,7 @@
     <script src="js/particles.js" defer></script>
 
     <script src="js/fade-in.js" defer></script>
+    <script src="js/xp-timeline.js" defer></script>
 
     <script src="js/typewriter.js" defer></script>
 

@@ -1215,25 +1215,48 @@ h2 {
   margin: 0;
   color: #00ffcc;
 }
-/* experience */
+/* experience / history timeline (js/xp-timeline.js adds the rails, tags and overview chart) */
 .experience {
   background: #1e1e3f;
   z-index: 2;
+  /* one colour per kind of thing, shared by the chart, the side lines and the tags */
+  --c-studies: #a48bff;
+  --c-work: #00ffcc;
+  --c-abroad: #fd7a33;
+  --c-company: #ffcf5c;
+  --c-muted: #9aa3c7;
 }
 
 .experience-list {
+  /* x positions of the lines, measured from the card's left edge */
+  --x-spine: -34px;
+  --x-company: -54px;
+  --x-studies: -72px;
+  --dot-y: 3rem;
+  --gap: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--gap);
   position: relative;
-  padding-left: 90px; /* room for sideways year labels */
+  padding-left: 130px; /* room for sideways year labels and the side lines */
 }
+.experience-item {
+  position: relative;
+  --dot-x: var(--x-spine);
+  --lane-c: var(--c-work);
+}
+.experience-item[data-lane='studies'] {
+  --dot-x: var(--x-studies);
+}
+.experience-item[data-lane='company'] {
+  --dot-x: var(--x-company);
+}
+
 .experience-year {
   position: absolute;
-  left: -85px;
-  top: 3rem;
-  transform: translateY(-50%) rotate(-90deg);
-  transform-origin: center;
+  left: -104px;
+  top: var(--dot-y);
+  transform: translate(-50%, -50%) rotate(-90deg);
   color: #00ffcc;
   font-weight: bold;
   font-family: monospace;
@@ -1241,6 +1264,7 @@ h2 {
   letter-spacing: 2px;
   white-space: nowrap;
   opacity: 0.7;
+  transition: opacity 0.3s ease, text-shadow 0.3s ease;
 }
 .experience-item:hover .experience-year {
   opacity: 1;
@@ -1250,43 +1274,110 @@ h2 {
   opacity: 1;
 }
 
-/* timeline line */
+/* main time line: runs from each dot down to the next one and draws in on scroll */
 .experience-item::after {
   content: '';
   position: absolute;
-  left: -35px;
-  top: 3rem;
+  left: var(--x-spine);
+  top: var(--dot-y);
   width: 2px;
-  height: calc(100% + 2rem);
-  background: #00ffcc;
-  transform: translateX(-50%);
+  height: calc(100% + var(--gap));
+  background: rgba(0, 255, 204, 0.55);
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s ease;
   z-index: 0;
 }
-
-.experience-item:last-child::after {
+.experience-item:has(> .experience-card.animate)::after {
+  transform: translateX(-50%) scaleY(1);
+}
+/* after the last entry only the things still going continue to "now" */
+.experience-item:last-child::after,
+.experience-item:has(+ .xp-now-item)::after {
   display: none;
 }
 
-/* timeline dots */
+/* timeline dots, coloured by kind; studies / company sit on their own side line */
 .experience-item::before {
   content: '';
   position: absolute;
-  left: -35px;
-  top: 3rem;
+  left: var(--dot-x);
+  top: var(--dot-y);
   width: 16px;
   height: 16px;
   background: #1e1e3f;
-  border: 2px solid #00ffcc;
+  border: 2px solid var(--lane-c);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  z-index: 2;
+  z-index: 3;
   transition:
     background 0.3s ease,
     box-shadow 0.3s ease;
 }
+.experience-item:hover::before,
+.experience-item.xp-linked::before,
 .current::before {
-  background: #00ffcc;
-  box-shadow: 0 0 12px #00ffcc;
+  background: var(--lane-c);
+  box-shadow: 0 0 12px var(--lane-c);
+}
+
+/* side lines: one per studies / company entry, running past everything that overlapped it */
+.xp-rail {
+  --x: var(--x-studies);
+  --c: var(--c-studies);
+  position: absolute;
+  left: var(--x);
+  top: 0;
+  bottom: calc(var(--gap) * -1);
+  width: 2px;
+  background: var(--c);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 45%, transparent);
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s ease;
+  z-index: 1;
+}
+.xp-rail--company {
+  --x: var(--x-company);
+  --c: var(--c-company);
+}
+.experience-item:has(> .experience-card.animate) > .xp-rail,
+.xp-now-item.animate > .xp-rail {
+  transform: translateX(-50%) scaleY(1);
+}
+.xp-rail.is-start {
+  top: var(--dot-y);
+}
+/* branch: from the dot on the side line across to the card */
+.xp-rail.is-start::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 1px;
+  width: calc(var(--x) * -1 - 2px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 20%, transparent));
+}
+/* finished: line stops under the last overlapping entry with a small cap */
+.xp-rail.is-end {
+  bottom: 0.25rem;
+}
+.xp-rail.is-end:not(.is-open)::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  background: #1e1e3f;
+  border: 2px solid var(--c);
+  border-radius: 2px;
+  transform: translateX(-50%) rotate(45deg);
+}
+/* still going: line stops at the "now" dot */
+.xp-rail.is-open {
+  bottom: auto;
+  height: var(--dot-y);
 }
 
 /* card */
@@ -1336,13 +1427,37 @@ h2 {
   box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
 }
 
-.experience-item:hover::before {
-  background: #00ffcc;
-  box-shadow: 0 0 12px #00ffcc;
+/* timeline cards: thin colour stripe on the left, glow in their own colour */
+.experience-list .experience-card {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--lane-c) 75%, transparent);
 }
-
-.experience-item {
-  position: relative;
+.experience-list .current .experience-card {
+  border-color: color-mix(in srgb, var(--lane-c) 85%, transparent);
+}
+.experience-list .experience-card:hover,
+.experience-list .xp-linked .experience-card {
+  border-color: var(--lane-c);
+  box-shadow:
+    inset 3px 0 0 var(--lane-c),
+    0 0 30px color-mix(in srgb, var(--lane-c) 45%, transparent);
+}
+.experience-list .xp-linked .experience-card {
+  transform: translateX(15px);
+}
+.xp-flash .experience-card {
+  animation: xpFlash 1.4s ease;
+}
+@keyframes xpFlash {
+  0%,
+  100% {
+    box-shadow: inset 3px 0 0 var(--lane-c);
+  }
+  30% {
+    box-shadow:
+      inset 3px 0 0 var(--lane-c),
+      0 0 0 2px var(--lane-c),
+      0 0 50px color-mix(in srgb, var(--lane-c) 70%, transparent);
+  }
 }
 
 .experience-card h3 {
@@ -1359,6 +1474,368 @@ h2 {
   color: #4dffdb !important;
 }
 
+/* tags under the date: kind, place, length */
+.xp-chips {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0.65rem 0 0.9rem;
+}
+.xp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
+  background: color-mix(in srgb, var(--c) 10%, transparent);
+  color: var(--c);
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.xp-chip.is-time {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+.xp-chip.is-place::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+/* "now" end node */
+.xp-now-item {
+  --dot-x: var(--x-company);
+  --dot-y: 1.45rem;
+  --lane-c: var(--c-company);
+}
+.xp-now-item::before {
+  background: var(--lane-c);
+  animation: xpPulse 2.2s ease-out infinite;
+}
+.xp-now-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--c-company) 45%, transparent);
+  background: color-mix(in srgb, var(--c-company) 8%, transparent);
+  color: #ccc;
+  font-size: 0.95rem;
+}
+.xp-now-card strong {
+  color: var(--c-company);
+  font-family: monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.xp-now-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  width: calc(var(--x-company) * -1 - 2px);
+  height: 2px;
+  background: linear-gradient(90deg, var(--c-company), color-mix(in srgb, var(--c-company) 20%, transparent));
+}
+.xp-now-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-company);
+  animation: xpPulse 2.2s ease-out infinite;
+}
+@keyframes xpPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-company) 70%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+/* ── overview chart ── */
+.xp-overview {
+  position: relative;
+  margin: 0 0 3.5rem;
+  padding: 1.25rem 1.5rem 1.1rem;
+  border: 1px solid rgba(0, 255, 204, 0.2);
+  border-radius: 15px;
+  background: radial-gradient(
+    circle at top left,
+    rgb(255 255 255 / 9%) 0%,
+    rgba(255, 255, 255, 0.05) 40%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.xp-overview.animate {
+  opacity: 1;
+  transform: none;
+}
+.xp-ov-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
+}
+.xp-ov-title {
+  color: #00ffcc;
+  font-family: monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+}
+.xp-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--c-muted);
+  font-family: monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.xp-legend li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.xp-legend li::before {
+  content: '';
+  width: 16px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--c);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.xp-chart {
+  --rows: 26px 42px 66px 42px 20px;
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  grid-template-rows: var(--rows);
+}
+.xp-axis-corner {
+  grid-area: 1 / 1;
+}
+.xp-lane-name {
+  grid-column: 1;
+  align-self: center;
+  color: var(--c);
+  font-family: monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.xp-lane-name:nth-child(2) {
+  grid-row: 2;
+}
+.xp-lane-name:nth-child(3) {
+  grid-row: 3;
+}
+.xp-lane-name:nth-child(4) {
+  grid-row: 4;
+}
+.xp-track {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  position: relative;
+  display: grid;
+  grid-template-rows: var(--rows);
+}
+.xp-year {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  color: var(--c-muted);
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.xp-gridline {
+  position: absolute;
+  top: 0;
+  bottom: 20px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.xp-row {
+  position: relative;
+  /* faint centre line so empty stretches still read as a lane */
+  background: linear-gradient(
+    transparent calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.07) calc(50% - 0.5px),
+    rgba(255, 255, 255, 0.07) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+}
+.xp-row--studies {
+  grid-row: 2;
+}
+.xp-row--work {
+  grid-row: 3;
+}
+.xp-row--company {
+  grid-row: 4;
+}
+.xp-bar {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--s) * 1%);
+  width: max(10px, calc(var(--w) * 1%));
+  height: 14px;
+  margin-top: -7px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, transparent), var(--c));
+  box-shadow: 0 0 12px color-mix(in srgb, var(--c) 40%, transparent);
+  cursor: pointer;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d),
+    filter 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.xp-overview.animate .xp-bar {
+  transform: scaleX(1);
+}
+.xp-bar:hover,
+.xp-bar:focus-visible,
+.xp-bar.is-linked {
+  z-index: 2;
+  outline: none;
+  filter: brightness(1.2);
+  box-shadow:
+    0 0 0 2px #1e1e3f,
+    0 0 0 3px var(--c),
+    0 0 22px var(--c);
+}
+.xp-bar-label {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #12122e;
+  font-family: monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.xp-overview.animate .xp-bar-label {
+  opacity: 1;
+  transition-delay: calc(var(--d) + 0.5s);
+}
+.xp-bar-label.is-above,
+.xp-bar-label.is-below {
+  left: 50%;
+  color: var(--c);
+  transform: translateX(-50%);
+}
+.xp-bar-label.is-above {
+  top: auto;
+  bottom: calc(100% + 5px);
+}
+.xp-bar-label.is-below {
+  top: calc(100% + 5px);
+}
+/* still going: pulsing tip at today's end */
+.xp-bar.is-ongoing::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--c);
+  animation: xpPulse 2.2s ease-out infinite;
+}
+.xp-now-line {
+  position: absolute;
+  top: 22px;
+  bottom: 0;
+  border-left: 1px dashed color-mix(in srgb, var(--c-company) 70%, transparent);
+  pointer-events: none;
+}
+.xp-now-label {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  transform: translateX(-50%);
+  color: var(--c-company);
+  font-family: monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.xp-tip {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 190px;
+  max-width: 290px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(0, 255, 204, 0.35);
+  border-radius: 10px;
+  background: rgba(14, 14, 40, 0.97);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  color: #ccc;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 12px));
+  transition: opacity 0.15s ease;
+}
+.xp-tip.is-on {
+  opacity: 1;
+}
+.xp-tip strong {
+  color: #fff;
+  font-size: 0.85rem;
+}
+.xp-tip-dur {
+  color: var(--c);
+  font-family: monospace;
+}
+.xp-ov-hint {
+  display: none;
+}
+
 .shootingstars-container {
   overflow: hidden;
   padding: 0;
@@ -1366,12 +1843,58 @@ h2 {
 }
 
 @media (max-width: 768px) {
+  /* lines move in tight, the year is already in each card's date */
   .experience-list {
-    padding-left: 20px;
+    --x-spine: -14px;
+    --x-company: -28px;
+    --x-studies: -42px;
+    padding-left: 50px;
   }
   .experience-year {
-    left: -15px;
-    font-size: 0.75rem;
+    display: none;
+  }
+  .experience-card {
+    padding: 1.5rem 1.25rem;
+  }
+  .experience-card h3 {
+    font-size: 1.2rem;
+  }
+  .xp-overview {
+    margin-bottom: 2.5rem;
+    padding: 1rem;
+  }
+  /* the chart keeps its width and scrolls sideways */
+  .xp-ov-scroll {
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 204, 0.4) transparent;
+  }
+  .xp-chart {
+    min-width: 560px;
+    grid-template-columns: 64px 1fr;
+  }
+  /* lane names stay pinned while the chart is swiped */
+  .xp-lane-name,
+  .xp-axis-corner {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, #29294b calc(100% - 10px), transparent);
+  }
+  .xp-ov-hint {
+    display: block;
+    margin: 0.5rem 0 0;
+    color: var(--c-muted);
+    font-family: monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+  .xp-now-card {
+    font-size: 0.85rem;
   }
 
   .project-card.skill-list h3 {
@@ -2047,18 +2570,6 @@ footer {
     width: 150px;
     height: 150px;
     margin: 0 auto;
-  }
-  .experience-list {
-    padding-left: 20px;
-  }
-  .experience-item::after {
-    left: -20px;
-  }
-  .experience-item::before {
-    left: -20px;
-  }
-  .experience-year {
-    left: -60px;
   }
 }
 
