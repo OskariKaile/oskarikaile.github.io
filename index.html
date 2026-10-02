@@ -1474,6 +1474,14 @@
                 <p>
                   Wake-word activated, controls apps, reads email, checks calendar, identifies songs, and runs tools by voice with a live HUD, system tray, and a full web hub for telemetry, agenda, skills, and settings. Runs locally on your machine.
                 </p>
+                <div class="project-links">
+                  <a
+                    class="sfx-hover sfx-click"
+                    href="#orion-demo"
+                    onclick="openOrionDemo(); return false;"
+                    >&#9654; Watch Demo</a
+                  >
+                </div>
               </div>
 
             <div class="experience-card">
@@ -2773,8 +2781,43 @@
         </div>
       </div>
     </div>
+    <div
+      id="orionDemoModal"
+      class="modal-overlay"
+      data-lenis-prevent
+      role="dialog"
+      aria-modal="true"
+      aria-label="Orion demo video"
+    >
+      <div class="modal-content modal-wide terminal-window orion-demo-window">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">orion_demo.mp4</span>
+          <button
+            type="button"
+            class="pipeline-close sfx-click sfx-hover"
+            onclick="closeOrionDemo()"
+            aria-label="Close"
+          >
+            &times;
+          </button>
+        </div>
+        <!-- src is set on open so the 13 MB file never loads unless someone asks for it -->
+        <video
+          class="orion-demo-video"
+          data-src="/images/orion-demo.mp4"
+          poster="/images/orion-demo-poster.webp"
+          controls
+          playsinline
+          preload="none"
+        ></video>
+      </div>
+    </div>
     <script src="js/contact-form.js" defer></script>
     <script src="js/pipeline-modal.js" defer></script>
+    <script src="js/orion-demo.js" defer></script>
     <script src="js/spotlight.js" defer></script>
     <script src="js/scroll-effects.js" defer></script>
 

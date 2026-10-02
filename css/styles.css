@@ -3189,6 +3189,24 @@ svg {
 .pipeline-icon {
   color: #00ffcc;
 }
+
+/* ── Orion demo video modal ──────────────────────────────────── */
+.orion-demo-window .terminal-title {
+  margin-right: auto;
+}
+.orion-demo-window .pipeline-close {
+  margin-left: 0;
+}
+.orion-demo-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /* keep the whole 16:9 frame inside the viewport on short screens */
+  max-height: calc(92dvh - 58px);
+  background: #000;
+  border-radius: 0 0 12px 12px;
+  object-fit: contain;
+}
 @media (max-width: 768px) {
   .featured-grid {
     grid-template-columns: 1fr;
