@@ -41,9 +41,9 @@ function handleScrollReveal() {
     const rect = container.getBoundingClientRect();
     const windowHeight = window.innerHeight;
 
-    // reveal track: 80% -> 30% of viewport
-    const start = windowHeight * 0.8;
-    const end = windowHeight * 0.3;
+    // reveal track: 85% -> 50% of viewport
+    const start = windowHeight * 0.85;
+    const end = windowHeight * 0.5;
 
     let progress = (start - rect.top) / (start - end);
     progress = Math.max(0, Math.min(1, progress));

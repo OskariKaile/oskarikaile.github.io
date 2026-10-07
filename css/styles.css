@@ -1185,13 +1185,15 @@ h2 {
   margin-bottom: 1rem;
   flex-grow: 1;
 }
-.project-card a {
+/* not the social icons (the about card is a project-card too): their "all 0.3s"
+   would slow the magnetic pull and hover compared to the same icons elsewhere */
+.project-card a:not(.social-icon) {
   color: #00ffcc;
   text-decoration: none;
   font-weight: 700;
   transition: all 0.3s ease;
 }
-.project-card a:hover {
+.project-card a:not(.social-icon):hover {
   color: #fd7a33;
   transition: all 0.3s ease;
 }
@@ -1274,7 +1276,8 @@ h2 {
   opacity: 1;
 }
 
-/* main time line: runs from each dot down to the next one and draws in on scroll */
+/* main time line: runs from each dot down to the next one. js/xp-timeline.js adds
+   .xp-drawn one item at a time, so each piece only starts where the one above ended */
 .experience-item::after {
   content: '';
   position: absolute;
@@ -1285,10 +1288,10 @@ h2 {
   background: rgba(0, 255, 204, 0.55);
   transform: translateX(-50%) scaleY(0);
   transform-origin: top;
-  transition: transform 0.9s ease;
+  transition: transform var(--draw, 0.9s) linear;
   z-index: 0;
 }
-.experience-item:has(> .experience-card.animate)::after {
+.experience-item.xp-drawn::after {
   transform: translateX(-50%) scaleY(1);
 }
 /* after the last entry only the things still going continue to "now" */
@@ -1334,15 +1337,14 @@ h2 {
   box-shadow: 0 0 8px color-mix(in srgb, var(--c) 45%, transparent);
   transform: translateX(-50%) scaleY(0);
   transform-origin: top;
-  transition: transform 0.9s ease;
+  transition: transform var(--draw, 0.9s) linear;
   z-index: 1;
 }
 .xp-rail--company {
   --x: var(--x-company);
   --c: var(--c-company);
 }
-.experience-item:has(> .experience-card.animate) > .xp-rail,
-.xp-now-item.animate > .xp-rail {
+.experience-item.xp-drawn > .xp-rail {
   transform: translateX(-50%) scaleY(1);
 }
 .xp-rail.is-start {

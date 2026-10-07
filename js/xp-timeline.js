@@ -251,4 +251,42 @@
     );
     reveal.observe(overview);
     items.filter((it) => it.lane === 'now').forEach((it) => reveal.observe(it.el));
+
+    /* ── lines draw in one after another ────────────────────── */
+    // each item's piece of the main line and side lines only starts once the piece
+    // above has reached it, so the line never shows a gap. Everything down to the
+    // lowest card in view gets drawn (also the ones a chart jump scrolled past)
+    const SPEED = 420; // px per second, doubled while catching up on several pieces
+    const shown = (it) => (it.card || it.el).classList.contains('animate');
+    let drawn = 0; // items[0 .. drawn-1] have their lines
+    let timer = null;
+
+    function sync() {
+        let target = -1;
+        items.forEach((it, i) => shown(it) && (target = i));
+
+        // scrolled back up: lines below the last card in view go away
+        if (drawn > target + 1) {
+            clearTimeout(timer);
+            timer = null;
+            items.slice(target + 1).forEach((it) => it.el.classList.remove('xp-drawn'));
+            drawn = target + 1;
+        }
+        if (timer || drawn > target) return;
+
+        const it = items[drawn++];
+        const gap = parseFloat(getComputedStyle(list).rowGap) || 0;
+        const speed = target - drawn > 1 ? SPEED * 2 : SPEED;
+        const secs = Math.min(Math.max((it.el.offsetHeight + gap) / speed, 0.25), 0.9);
+        it.el.style.setProperty('--draw', `${secs}s`);
+        it.el.classList.add('xp-drawn');
+        timer = setTimeout(() => {
+            timer = null;
+            sync();
+        }, secs * 1000);
+    }
+
+    const watch = new MutationObserver(sync);
+    items.forEach((it) => watch.observe(it.card || it.el, { attributes: true, attributeFilter: ['class'] }));
+    sync();
 })();
