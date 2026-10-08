@@ -241,6 +241,9 @@ async function initGlobe() {
             return el;
         });
 
+    // the hero orbit field reads the camera from here so it can spin with the globe
+    window.heroGlobe = world;
+
     // building all 177 country meshes, compiling their shaders and uploading
     // them in one go froze the page for ~0.5s a few seconds after load. so:
     // hold rendering, compile shaders off the main thread, then add the
@@ -252,6 +255,7 @@ async function initGlobe() {
         // small pause before the entrance so the page settles first
         setTimeout(() => {
             globeEl.classList.add('globe-ready');
+            window.dispatchEvent(new Event('globe:ready'));
 
             const now = new Date();
             const current = getLatLngAlt(now);
